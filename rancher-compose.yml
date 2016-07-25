@@ -1,0 +1,43 @@
+sonar:
+  scale: 1
+nexus:
+  scale: 1
+jenkins:
+  scale: 1
+gitlab:
+  external_ips:
+  - romeo.mvfor.local
+  health_check:
+    port: 80
+    interval: 2000
+    initializing_timeout: 60000
+    unhealthy_threshold: 3
+    strategy: recreate
+    response_timeout: 2000
+    healthy_threshold: 2
+zabbix:
+  external_ips:
+  - zulu.mvfor.local
+rancher-server:
+  external_ips:
+  - victor.mvfor.local
+  health_check:
+    port: 8090
+    interval: 2000
+    initializing_timeout: 60000
+    unhealthy_threshold: 3
+    strategy: recreate
+    response_timeout: 2000
+    healthy_threshold: 2
+sonar-mysql:
+  scale: 1
+balancer:
+  scale: 1
+  load_balancer_config:
+    haproxy_config: {}
+  health_check:
+    port: 42
+    interval: 2000
+    unhealthy_threshold: 3
+    healthy_threshold: 2
+    response_timeout: 2000

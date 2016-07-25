@@ -1,0 +1,67 @@
+sonar:
+  environment:
+    SONARQUBE_JDBC_PASSWORD: sonar
+    SONARQUBE_JDBC_URL: jdbc:mysql://mysql/sonar?useUnicode=true&characterEncoding=utf8
+    SONARQUBE_JDBC_USERNAME: sonar
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: sonarqube
+  links:
+  - sonar-mysql:mysql
+  stdin_open: true
+nexus:
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: sonatype/nexus:oss
+  volumes:
+  - /home/rancher/data/nexus-data:/sonatype-work
+  stdin_open: true
+jenkins:
+  ports:
+  - 9999:9999/tcp
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: jenkinsci/jenkins:latest
+  volumes:
+  - /home/rancher/data/jenkins-data:/var/jenkins_home
+  stdin_open: true
+gitlab:
+  image: rancher/external-service
+zabbix:
+  image: rancher/external-service
+rancher-server:
+  image: rancher/external-service
+sonar-mysql:
+  environment:
+    MYSQL_DATABASE: sonar
+    MYSQL_PASSWORD: sonar
+    MYSQL_ROOT_PASSWORD: mysql
+    MYSQL_USER: sonar
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  image: mysql:latest
+  volumes:
+  - /home/rancher/data/sonar-data:/var/lib/mysql
+  stdin_open: true
+balancer:
+  ports:
+  - 80:80
+  labels:
+    io.rancher.loadbalancer.target.zabbix: zabbix.mvfor.local
+    io.rancher.loadbalancer.target.sonar: sonar.mvfor.local=9000
+    io.rancher.loadbalancer.target.rancher-server: rancher.mvfor.local=8080
+    io.rancher.loadbalancer.target.jenkins: jenkins.mvfor.local=8080
+    io.rancher.loadbalancer.target.nexus: nexus.mvfor.local=8081
+  tty: true
+  image: rancher/load-balancer-service
+  links:
+  - nexus:nexus
+  - zabbix:zabbix
+  - rancher-server:rancher-server
+  - sonar:sonar
+  - jenkins:jenkins
+  stdin_open: true
